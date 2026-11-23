@@ -1,0 +1,41 @@
+import { Route, Routes } from 'react-router-dom'
+
+import { Layout } from './components/Layout'
+import { RequireAuth } from './lib/auth'
+import { AuditPage } from './pages/Audit'
+import { DashboardPage } from './pages/Dashboard'
+import { LoginPage } from './pages/Login'
+import { UsersPage } from './pages/Users'
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route
+        element={
+          <RequireAuth>
+            <Layout />
+          </RequireAuth>
+        }
+      >
+        <Route index element={<DashboardPage />} />
+        <Route
+          path="admin/users"
+          element={
+            <RequireAuth roles={['owner']}>
+              <UsersPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="admin/audit"
+          element={
+            <RequireAuth roles={['owner']}>
+              <AuditPage />
+            </RequireAuth>
+          }
+        />
+      </Route>
+    </Routes>
+  )
+}
