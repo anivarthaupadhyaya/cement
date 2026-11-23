@@ -14,6 +14,8 @@ interface NavItem {
 
 const NAV: NavItem[] = [
   { to: '/', label: 'Dashboard' },
+  { to: '/sales/new', label: '+ New bill', roles: ['owner', 'accountant', 'billing'] },
+  { to: '/sales', label: 'Bills' },
   { to: '/rates', label: "Today's rates" },
   { to: '/stock', label: 'Stock' },
   { to: '/purchases', label: 'Purchases', roles: ['owner', 'accountant', 'godown'] },
@@ -43,7 +45,7 @@ export function Layout() {
             <NavLink
               key={n.to}
               to={n.to}
-              end={n.to === '/'}
+              end={n.to === '/' || n.to === '/sales'}
               className={({ isActive }) =>
                 cx(
                   'block rounded-md px-3 py-2 text-sm',

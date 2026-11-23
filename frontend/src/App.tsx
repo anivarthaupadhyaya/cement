@@ -5,12 +5,16 @@ import { RequireAuth } from './lib/auth'
 import { AuditPage } from './pages/Audit'
 import { DashboardPage } from './pages/Dashboard'
 import { LoginPage } from './pages/Login'
+import { NewBillPage } from './pages/NewBill'
 import { PartiesPage } from './pages/Parties'
+import { PrintSalePage } from './pages/PrintSale'
 import { ProductsPage } from './pages/Products'
 import { PurchaseDetailPage } from './pages/PurchaseDetail'
 import { PurchaseNewPage } from './pages/PurchaseNew'
 import { PurchasesPage } from './pages/Purchases'
 import { RatesPage } from './pages/Rates'
+import { SaleDetailPage } from './pages/SaleDetail'
+import { SalesPage } from './pages/Sales'
 import { SettingsPage } from './pages/Settings'
 import { StockPage } from './pages/Stock'
 import { UsersPage } from './pages/Users'
@@ -20,6 +24,14 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route
+        path="/sales/:id/print"
+        element={
+          <RequireAuth>
+            <PrintSalePage />
+          </RequireAuth>
+        }
+      />
+      <Route
         element={
           <RequireAuth>
             <Layout />
@@ -27,6 +39,16 @@ export default function App() {
         }
       >
         <Route index element={<DashboardPage />} />
+        <Route
+          path="sales/new"
+          element={
+            <RequireAuth roles={['owner', 'accountant', 'billing']}>
+              <NewBillPage />
+            </RequireAuth>
+          }
+        />
+        <Route path="sales" element={<SalesPage />} />
+        <Route path="sales/:id" element={<SaleDetailPage />} />
         <Route path="rates" element={<RatesPage />} />
         <Route path="stock" element={<StockPage />} />
         <Route
