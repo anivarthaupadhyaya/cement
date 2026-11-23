@@ -10,6 +10,7 @@ pip install -e ".[dev]"
 docker compose up -d db                            # from repo root
 alembic upgrade head
 python -m app.cli create-owner owner "Shop Owner"  # first login
+python -m app.cli reset-password owner             # forgot password
 uvicorn app.main:app --reload --port 8010          # http://localhost:8010/docs
 ```
 
