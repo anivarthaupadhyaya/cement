@@ -274,6 +274,8 @@ export interface Sale extends SaleSummary {
   igst_total: Decimal
   round_off: Decimal
   amount_in_words: string
+  paid: Decimal
+  balance_due: Decimal
   cost_total: Decimal | null
   margin: Decimal | null
   credit_override_reason: string | null
@@ -302,4 +304,107 @@ export interface Quote {
   source: 'party' | 'list'
   effective_from: string
   gst_rate: Decimal
+}
+
+// ---- Receipts & credit ---------------------------------------------------------------
+export type PayMode = 'cash' | 'upi' | 'bank' | 'cheque'
+export type ChequeStatus = 'received' | 'deposited' | 'cleared' | 'bounced'
+
+export interface OpenItem {
+  kind: 'invoice' | 'due'
+  id: number
+  ref_no: string
+  date: string
+  age_days: number
+  amount: Decimal
+  paid: Decimal
+  balance: Decimal
+}
+
+export interface ReceiptPreview {
+  outstanding: Decimal
+  open_items: OpenItem[]
+  plan: { kind: 'invoice' | 'due'; id: number; ref_no: string; amount: Decimal }[]
+  advance_after: Decimal
+  bounced_cheques: number
+}
+
+export interface Receipt {
+  id: number
+  receipt_no: string
+  receipt_date: string
+  party_id: number
+  party_name: string
+  mode: PayMode
+  amount: Decimal
+  reference: string | null
+  cheque_no: string | null
+  cheque_date: string | null
+  bank_name: string | null
+  cheque_status: ChequeStatus | null
+  status: 'active' | 'cancelled'
+  cancel_reason: string | null
+  notes: string | null
+  allocated: Decimal
+  unallocated: Decimal
+  allocations: { kind: 'invoice' | 'due'; id: number; ref_no: string; amount: Decimal }[]
+  balance_after: Decimal
+  amount_in_words: string
+  created_at: string
+}
+
+export interface StatementLine {
+  id: number
+  date: string
+  kind: string
+  ref_no: string | null
+  narration: string | null
+  debit: Decimal
+  credit: Decimal
+  balance: Decimal
+}
+
+export interface Statement {
+  party_id: number
+  party_name: string
+  phone: string | null
+  date_from: string
+  date_to: string
+  opening: Decimal
+  lines: StatementLine[]
+  closing: Decimal
+  total_debit: Decimal
+  total_credit: Decimal
+}
+
+export interface AgeingRow {
+  party_id: number
+  party_name: string
+  phone: string | null
+  area: string | null
+  credit_limit: Decimal
+  credit_days: number
+  b0_30: Decimal
+  b31_60: Decimal
+  b61_90: Decimal
+  b90_plus: Decimal
+  due: Decimal
+  advance: Decimal
+  net: Decimal
+  overdue: Decimal
+  oldest_days: number
+  open_bills: number
+}
+
+export interface Ageing {
+  as_of: string
+  rows: AgeingRow[]
+  totals: Record<string, Decimal>
+}
+
+export const PAY_MODE_LABELS: Record<PayMode, string> = {
+  cash: 'Cash',
+  upi: 'UPI',
+  bank: 'Bank transfer',
+  cheque: 'Cheque',
 }

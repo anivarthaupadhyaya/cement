@@ -32,3 +32,16 @@ export function toPaise(value: string): number {
 export function paiseToRupees(paise: number): string {
   return (paise / 100).toFixed(2)
 }
+
+/** Signed rupee string -> paise (handles "-1050.00"). Display-side only. */
+export function signedPaise(value: string): number {
+  const v = value.trim()
+  return v.startsWith('-') ? -toPaise(v.slice(1)) : toPaise(v)
+}
+
+/** WhatsApp click-to-chat link; works without any WhatsApp API setup. */
+export function whatsappLink(phone: string | null, text: string): string {
+  const digits = (phone ?? '').replace(/\D/g, '')
+  const number = digits.length === 10 ? `91${digits}` : digits
+  return `https://wa.me/${number}?text=${encodeURIComponent(text)}`
+}

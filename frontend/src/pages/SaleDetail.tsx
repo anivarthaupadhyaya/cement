@@ -236,6 +236,30 @@ export function SaleDetailPage() {
               )}
             </dl>
             <p className="mt-2 text-xs text-stone-500">{s.amount_in_words}</p>
+            {active && s.payment_mode === 'credit' && (
+              <div className="mt-3 space-y-1 border-t border-stone-200 pt-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-stone-500">Paid</span>
+                  <span className="tabular-nums text-green-700">{formatINR(s.paid)}</span>
+                </div>
+                <div className="flex justify-between font-semibold">
+                  <span>Balance due</span>
+                  <span className={`tabular-nums ${Number(s.balance_due) > 0 ? 'text-red-700' : ''}`}>{formatINR(s.balance_due)}</span>
+                </div>
+                {s.party_id && (
+                  <div className="flex gap-2 pt-2">
+                    {Number(s.balance_due) > 0 && (
+                      <Link to={`/receipts/new?party=${s.party_id}`} className="flex-1">
+                        <Button className="w-full">Receive payment</Button>
+                      </Link>
+                    )}
+                    <Link to={`/parties/${s.party_id}/ledger`} className="flex-1">
+                      <Button variant="secondary" className="w-full">Statement</Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
           </Card>
 
           {active && can(me, 'owner', 'accountant') && <ReturnCard sale={s} onDone={refresh} />}

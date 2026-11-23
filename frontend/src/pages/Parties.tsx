@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 import { api } from '../api/client'
 import type { Party, PartyKind } from '../api/types'
@@ -233,6 +234,13 @@ export function PartiesPage() {
               <Button type="submit" className="flex-1" disabled={save.isPending}>
                 {editing ? 'Save changes' : 'Add party'}
               </Button>
+              {editing && (
+                <Link to={`/parties/${editing.id}/ledger`}>
+                  <Button type="button" variant="secondary">
+                    Statement
+                  </Button>
+                </Link>
+              )}
               {editing && (
                 <Button
                   type="button"
