@@ -5,7 +5,7 @@ from decimal import ROUND_HALF_UP, Decimal
 PAISE = Decimal("0.01")
 COST = Decimal("0.0001")  # unit costs keep 4 places so averages don't drift
 RUPEE = Decimal("1")
-ZERO = Decimal("0")
+ZERO = Decimal("0.00")  # keeps two places, so a zero amount still serialises as "0.00"
 
 
 def q2(x: Decimal) -> Decimal:
