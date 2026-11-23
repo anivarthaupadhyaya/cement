@@ -18,9 +18,7 @@ class Role(StrEnum):
 class User(TimestampMixin, Base):
     __tablename__ = "users"
     __table_args__ = (
-        CheckConstraint(
-            "role IN ('owner','accountant','billing','godown')", name="ck_users_role"
-        ),
+        CheckConstraint("role IN ('owner','accountant','billing','godown')", name="ck_users_role"),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
