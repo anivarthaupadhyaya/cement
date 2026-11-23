@@ -11,7 +11,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models import OtherDue, Party, Receipt
-from app.services import ledger
+from app.services import cash, ledger
 from app.services.ledger import OpenItem
 from app.services.money import ZERO, q2
 from app.services.numbering import next_number
@@ -19,6 +19,13 @@ from app.services.numbering import next_number
 
 class ReceiptError(Exception):
     pass
+
+
+def _cash_day_open(db: Session, on: date, what: str) -> None:
+    try:
+        cash.ensure_open(db, on, what)
+    except cash.CashError as exc:
+        raise ReceiptError(str(exc)) from exc
 
 
 CHEQUE_FLOW = {
@@ -53,6 +60,8 @@ def create_receipt(
         raise ReceiptError("Receipts are taken from customers")
     if mode == "cheque" and not cheque_no:
         raise ReceiptError("Enter the cheque number")
+    if mode == "cash":
+        _cash_day_open(db, on, "cash receipts")
     ledger.lock_party(db, party.id)
 
     receipt = Receipt(
@@ -110,6 +119,8 @@ def cancel_receipt(db: Session, receipt: Receipt, reason: str, user_id: int | No
         raise ReceiptError("This receipt is already cancelled")
     if receipt.cheque_status == "bounced":
         raise ReceiptError("A bounced cheque is already reversed")
+    if receipt.mode == "cash":
+        _cash_day_open(db, date.today(), "cash refunds")
     ledger.lock_party(db, receipt.party_id)
     ledger.release_receipt(db, receipt.id)
     receipt.status = "cancelled"

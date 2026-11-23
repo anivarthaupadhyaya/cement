@@ -24,7 +24,7 @@ from app.models import (
     SalesReturnLine,
     StockBalance,
 )
-from app.services import ledger, stock
+from app.services import cash, ledger, stock
 from app.services.gst import is_interstate
 from app.services.ledger import party_outstanding
 from app.services.money import ZERO, q2, round_off, split_gst
@@ -38,6 +38,13 @@ class BillingError(Exception):
 
 class CreditLimitExceeded(BillingError):
     pass
+
+
+def _cash_day_open(on: date, db: Session, what: str) -> None:
+    try:
+        cash.ensure_open(db, on, what)
+    except cash.CashError as exc:
+        raise BillingError(str(exc)) from exc
 
 
 # ---- Pure maths -------------------------------------------------------------------
@@ -257,6 +264,9 @@ def create_invoice(
     if not is_owner and any(ln.below_cost for ln in bill.lines):
         raise BillingError("Rate is below cost; only the owner can bill at this rate")
 
+    if bill.payment_mode == "cash":
+        _cash_day_open(bill.on, db, "cash bills")
+
     settings = get_settings()
     invoice_no = next_number(db, "INV", settings.invoice_prefix, bill.on)
     cgst, sgst, igst = tax_split(bill.amounts.gst_total, bill.interstate)
@@ -336,6 +346,8 @@ def cancel_invoice(
     if invoice.status == "cancelled":
         raise BillingError("This bill is already cancelled")
     today = date.today()
+    if invoice.payment_mode == "cash":
+        _cash_day_open(today, db, "cash refunds")
     for line in invoice.lines:
         remaining = line.qty - line.qty_returned
         if remaining > 0:
@@ -372,6 +384,8 @@ def create_return(
         raise BillingError("Can't take a return on a cancelled bill")
     if on < invoice.invoice_date:
         raise BillingError("Return date is before the bill date")
+    if invoice.payment_mode == "cash":
+        _cash_day_open(on, db, "cash refunds")
     by_id = {ln.id: ln for ln in invoice.lines}
     if not items:
         raise BillingError("Choose the bags being returned")
