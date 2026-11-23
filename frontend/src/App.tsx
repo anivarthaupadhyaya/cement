@@ -5,6 +5,10 @@ import { RequireAuth } from './lib/auth'
 import { AuditPage } from './pages/Audit'
 import { DashboardPage } from './pages/Dashboard'
 import { LoginPage } from './pages/Login'
+import { PartiesPage } from './pages/Parties'
+import { ProductsPage } from './pages/Products'
+import { RatesPage } from './pages/Rates'
+import { SettingsPage } from './pages/Settings'
 import { UsersPage } from './pages/Users'
 
 export default function App() {
@@ -19,6 +23,10 @@ export default function App() {
         }
       >
         <Route index element={<DashboardPage />} />
+        <Route path="rates" element={<RatesPage />} />
+        <Route path="parties" element={<PartiesPage />} />
+        <Route path="products" element={<ProductsPage />} />
+        <Route path="settings" element={<SettingsPage />} />
         <Route
           path="admin/users"
           element={

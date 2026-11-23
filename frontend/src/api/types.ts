@@ -25,3 +25,68 @@ export const ROLE_LABELS: Record<Role, string> = {
   billing: 'Billing clerk',
   godown: 'Godown keeper',
 }
+
+// ---- Masters ---------------------------------------------------------------
+// Money and quantities arrive as exact decimal strings (e.g. "380.00"), never floats.
+export type Decimal = string
+
+export interface Brand {
+  id: number
+  name: string
+  is_active: boolean
+}
+
+export interface Product {
+  id: number
+  brand_id: number
+  brand_name: string
+  name: string
+  grade: string
+  bag_kg: Decimal
+  hsn_code: string
+  reorder_level: number
+  is_active: boolean
+}
+
+export interface Godown {
+  id: number
+  name: string
+  address: string | null
+  is_active: boolean
+}
+
+export type PartyKind = 'customer' | 'supplier' | 'both'
+
+export interface Party {
+  id: number
+  kind: PartyKind
+  name: string
+  phone: string | null
+  gstin: string | null
+  state_code: string
+  address: string | null
+  area: string | null
+  credit_limit: Decimal
+  credit_days: number
+  notes: string | null
+  is_active: boolean
+}
+
+export interface GstRate {
+  id: number
+  hsn_code: string
+  rate: Decimal
+  effective_from: string
+}
+
+export interface RateCardRow {
+  product_id: number
+  product_name: string
+  hsn_code: string
+  gst_rate: Decimal | null
+  rate: Decimal | null
+  effective_from: string | null
+  previous_rate: Decimal | null
+}
+
+export const CEMENT_GRADES = ['OPC 43', 'OPC 53', 'PPC', 'PSC', 'PCC']
