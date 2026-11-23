@@ -41,6 +41,10 @@ target-version = "py311"
 select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
 ignore = ["B008"]  # FastAPI Depends() in defaults
 
+[tool.ruff.lint.isort]
+known-first-party = ["app", "tests"]
+known-third-party = ["alembic"]
+
 [tool.mypy]
 python_version = "3.11"
 plugins = ["pydantic.mypy"]

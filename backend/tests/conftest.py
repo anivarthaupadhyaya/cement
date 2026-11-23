@@ -7,12 +7,12 @@ TEST_DB = os.environ.get(
 os.environ["DATABASE_URL"] = TEST_DB  # must happen before the app is imported
 
 import pytest  # noqa: E402
+from alembic import command  # noqa: E402
 from alembic.config import Config  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 from sqlalchemy import text  # noqa: E402
 from sqlalchemy.orm import Session  # noqa: E402
 
-from alembic import command  # noqa: E402
 from app.core.db import engine, get_db  # noqa: E402
 from app.core.security import hash_password  # noqa: E402
 from app.main import app  # noqa: E402
