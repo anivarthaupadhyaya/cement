@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -21,8 +22,9 @@ from app.schemas.sales import (
     SaleSummary,
     ShopOut,
 )
-from app.services import billing
+from app.services import billing, ledger
 from app.services.gst import STATE_CODES
+from app.services.money import ZERO
 from app.services.stock import InsufficientStock
 from app.services.words import rupees_in_words
 
@@ -106,7 +108,19 @@ def _return_out(r: SalesReturn) -> dict[str, Any]:
     }
 
 
-def _detail(inv: SalesInvoice, user: User) -> dict[str, Any]:
+def _payment_status(db: Session, inv: SalesInvoice) -> dict[str, Decimal]:
+    """Cash bills are paid at the counter; credit bills are paid by allocated receipts."""
+    returned = sum((r.total for r in inv.returns), ZERO)
+    net = inv.grand_total - returned
+    if inv.status == "cancelled":
+        return {"paid": ZERO, "balance_due": ZERO}
+    if inv.payment_mode == "cash":
+        return {"paid": net, "balance_due": ZERO}
+    paid = ledger.invoice_paid(db, inv.id)
+    return {"paid": paid, "balance_due": net - paid}
+
+
+def _detail(db: Session, inv: SalesInvoice, user: User) -> dict[str, Any]:
     show_cost = sees_cost(user)
     goods_taxable = inv.taxable_total - inv.delivery_taxable
     out = _summary(inv)
@@ -130,6 +144,7 @@ def _detail(inv: SalesInvoice, user: User) -> dict[str, Any]:
             "igst_total": inv.igst_total,
             "round_off": inv.round_off,
             "amount_in_words": rupees_in_words(inv.grand_total),
+            **_payment_status(db, inv),
             "cost_total": inv.cost_total if show_cost else None,
             "margin": goods_taxable - inv.cost_total if show_cost else None,
             "credit_override_reason": inv.credit_override_reason,
@@ -239,7 +254,7 @@ def create_sale(body: SaleIn, db: Session = Depends(get_db), user: User = Depend
     # Double-click / retry after a network blip: hand back the bill already saved.
     existing = billing.find_by_client_ref(db, body.client_ref)
     if existing is not None:
-        return _detail(_load(db, existing.id), user)
+        return _detail(db, _load(db, existing.id), user)
 
     bill = _prepare(db, body, _bill_date(body.invoice_date, user))
     try:
@@ -271,8 +286,8 @@ def create_sale(body: SaleIn, db: Session = Depends(get_db), user: User = Depend
         winner = billing.find_by_client_ref(db, body.client_ref)
         if winner is None:
             raise
-        return _detail(_load(db, winner.id), user)
-    return _detail(_load(db, invoice.id), user)
+        return _detail(db, _load(db, winner.id), user)
+    return _detail(db, _load(db, invoice.id), user)
 
 
 @router.get("/sales", response_model=list[SaleSummary])
@@ -312,7 +327,7 @@ def list_sales(
 def get_sale(
     invoice_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)
 ) -> Any:
-    return _detail(_load(db, invoice_id), user)
+    return _detail(db, _load(db, invoice_id), user)
 
 
 @router.post("/sales/{invoice_id}/cancel", response_model=SaleOut)
@@ -330,7 +345,7 @@ def cancel_sale(
     except billing.BillingError as exc:
         db.rollback()
         raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc)) from exc
-    return _detail(_load(db, invoice_id), user)
+    return _detail(db, _load(db, invoice_id), user)
 
 
 @router.post("/sales/{invoice_id}/returns", response_model=SaleOut, status_code=201)
@@ -357,4 +372,4 @@ def create_return(
     except billing.BillingError as exc:
         db.rollback()
         raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc)) from exc
-    return _detail(_load(db, invoice_id), user)
+    return _detail(db, _load(db, invoice_id), user)

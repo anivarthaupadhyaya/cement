@@ -138,6 +138,8 @@ class SaleOut(SaleSummary):
     igst_total: Money
     round_off: Money
     amount_in_words: str
+    paid: Money
+    balance_due: Money
     cost_total: Money | None
     margin: Money | None
     credit_override_reason: str | None

@@ -108,6 +108,8 @@ def test_payment_settles_oldest_bill_first(client, shop, builder):
     assert r["allocated"] == "5000.00" and r["unallocated"] == "0.00"
     assert r["balance_after"] == "925.00"
     assert open_bills(client, builder) == {b["invoice_no"]: "925.00"}
+    detail = client.get(f"/api/sales/{b['id']}").json()
+    assert (detail["paid"], detail["balance_due"]) == ("1050.00", "925.00")
     ledger_ok(client)
 
 
