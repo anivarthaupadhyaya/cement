@@ -24,7 +24,7 @@ from app.models import (
     SalesReturnLine,
     StockBalance,
 )
-from app.services import stock
+from app.services import ledger, stock
 from app.services.gst import is_interstate
 from app.services.ledger import party_outstanding
 from app.services.money import ZERO, q2, round_off, split_gst
@@ -226,6 +226,12 @@ def prepare_bill(
     )
     if bill.over_limit:
         warnings.append("This bill takes the customer over their credit limit")
+    if party is not None:
+        from app.services.receipts import bounce_count  # local: receipts imports ledger too
+
+        bounced = bounce_count(db, party.id)
+        if bounced:
+            warnings.append(f"{bounced} cheque(s) from this customer bounced before")
     return bill
 
 
@@ -315,6 +321,8 @@ def create_invoice(
         )
     invoice.cost_total = cost_total
     db.flush()
+    if invoice.payment_mode == "credit":
+        ledger.on_credit_invoice(db, invoice, user_id)
     return invoice
 
 
@@ -344,6 +352,10 @@ def cancel_invoice(
     invoice.status = "cancelled"
     invoice.cancel_reason = reason
     invoice.cancelled_at = datetime.now(UTC)
+    db.flush()
+    if invoice.payment_mode == "credit":
+        returned = sum((r.total for r in invoice.returns), ZERO)
+        ledger.on_invoice_cancel(db, invoice, returned, today, user_id)
     return invoice
 
 
@@ -417,4 +429,7 @@ def create_return(
             on,
             user_id,
         )
+    if invoice.payment_mode == "credit":
+        db.refresh(invoice, ["returns"])
+        ledger.on_credit_note(db, invoice, ret, user_id)
     return ret
