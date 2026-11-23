@@ -15,6 +15,15 @@ class Settings(BaseSettings):
     # The shop's own GST state code (29 = Karnataka). Decides CGST+SGST vs IGST.
     shop_state_code: str = "29"
 
+    # Printed on invoices.
+    shop_name: str = "Your Cement Agency"
+    shop_address: str = "Main Road, Udupi, Karnataka"
+    shop_gstin: str = ""
+    shop_phone: str = ""
+    shop_bank: str = ""  # e.g. "SBI Udupi · A/c 1234567890 · IFSC SBIN0000001"
+    invoice_prefix: str = "INV"
+    credit_note_prefix: str = "CN"
+
 
 @lru_cache
 def get_settings() -> Settings:
