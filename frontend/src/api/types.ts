@@ -90,3 +90,89 @@ export interface RateCardRow {
 }
 
 export const CEMENT_GRADES = ['OPC 43', 'OPC 53', 'PPC', 'PSC', 'PCC']
+
+// ---- Purchases & stock -------------------------------------------------------
+export interface PurchaseSummary {
+  id: number
+  supplier_id: number
+  supplier_name: string
+  supplier_invoice_no: string
+  invoice_date: string
+  received_date: string
+  godown_name: string
+  total_bags: number
+  invoice_total: Decimal
+  status: 'active' | 'cancelled'
+}
+
+export interface PurchaseLine {
+  id: number
+  product_id: number
+  product_name: string
+  qty_invoiced: number
+  qty_received: number
+  qty_damaged: number
+  qty_short: number
+  rate: Decimal
+  gst_rate: Decimal
+  taxable: Decimal
+  gst_amount: Decimal
+  charges: Decimal
+  landed_cost: Decimal
+}
+
+export interface Purchase extends PurchaseSummary {
+  godown_id: number
+  vehicle_no: string | null
+  lr_no: string | null
+  is_interstate: boolean
+  freight: Decimal
+  unloading: Decimal
+  other_charges: Decimal
+  taxable_total: Decimal
+  cgst_total: Decimal
+  sgst_total: Decimal
+  igst_total: Decimal
+  round_off: Decimal
+  notes: string | null
+  cancel_reason: string | null
+  created_at: string
+  lines: PurchaseLine[]
+}
+
+export interface StockRow {
+  product_id: number
+  product_name: string
+  godown_id: number
+  godown_name: string
+  qty: number
+  reorder_level: number
+  low: boolean
+  avg_cost: Decimal | null
+  value: Decimal | null
+}
+
+export interface Movement {
+  id: number
+  movement_date: string
+  product_name: string
+  godown_name: string
+  qty: number
+  kind: string
+  ref_type: string | null
+  ref_id: number | null
+  note: string | null
+  unit_cost: Decimal | null
+  created_at: string
+}
+
+export const MOVEMENT_LABELS: Record<string, string> = {
+  opening: 'Opening stock',
+  purchase: 'Purchase',
+  purchase_cancel: 'Purchase cancelled',
+  sale: 'Sale',
+  sale_return: 'Sale return',
+  sale_cancel: 'Sale cancelled',
+  damage: 'Damage',
+  adjustment: 'Adjustment',
+}

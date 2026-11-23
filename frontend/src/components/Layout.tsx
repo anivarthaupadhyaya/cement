@@ -15,6 +15,8 @@ interface NavItem {
 const NAV: NavItem[] = [
   { to: '/', label: 'Dashboard' },
   { to: '/rates', label: "Today's rates" },
+  { to: '/stock', label: 'Stock' },
+  { to: '/purchases', label: 'Purchases', roles: ['owner', 'accountant', 'godown'] },
   { to: '/parties', label: 'Customers & suppliers' },
   { to: '/products', label: 'Products' },
   { to: '/settings', label: 'Settings' },

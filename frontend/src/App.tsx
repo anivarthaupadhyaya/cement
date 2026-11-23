@@ -7,8 +7,12 @@ import { DashboardPage } from './pages/Dashboard'
 import { LoginPage } from './pages/Login'
 import { PartiesPage } from './pages/Parties'
 import { ProductsPage } from './pages/Products'
+import { PurchaseDetailPage } from './pages/PurchaseDetail'
+import { PurchaseNewPage } from './pages/PurchaseNew'
+import { PurchasesPage } from './pages/Purchases'
 import { RatesPage } from './pages/Rates'
 import { SettingsPage } from './pages/Settings'
+import { StockPage } from './pages/Stock'
 import { UsersPage } from './pages/Users'
 
 export default function App() {
@@ -24,6 +28,31 @@ export default function App() {
       >
         <Route index element={<DashboardPage />} />
         <Route path="rates" element={<RatesPage />} />
+        <Route path="stock" element={<StockPage />} />
+        <Route
+          path="purchases"
+          element={
+            <RequireAuth roles={['owner', 'accountant', 'godown']}>
+              <PurchasesPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="purchases/new"
+          element={
+            <RequireAuth roles={['owner', 'accountant', 'godown']}>
+              <PurchaseNewPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="purchases/:id"
+          element={
+            <RequireAuth roles={['owner', 'accountant', 'godown']}>
+              <PurchaseDetailPage />
+            </RequireAuth>
+          }
+        />
         <Route path="parties" element={<PartiesPage />} />
         <Route path="products" element={<ProductsPage />} />
         <Route path="settings" element={<SettingsPage />} />

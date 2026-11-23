@@ -20,3 +20,15 @@ export function todayISO(): string {
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
+
+/** Parse a rupee string into integer paise (display-side estimates only). */
+export function toPaise(value: string): number {
+  const v = value.trim()
+  if (!/^\d+(\.\d{0,2})?$/.test(v)) return NaN
+  const [whole, frac = ''] = v.split('.')
+  return Number(whole) * 100 + Number(frac.padEnd(2, '0'))
+}
+
+export function paiseToRupees(paise: number): string {
+  return (paise / 100).toFixed(2)
+}
