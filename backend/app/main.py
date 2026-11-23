@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from app.api import auth, masters, prices, purchases, sales, stock, users
+from app.api import auth, masters, prices, purchases, receipts, sales, stock, users
 
 app = FastAPI(title="Cement Wholesaler Management System", version="0.1.0")
 
@@ -15,6 +15,7 @@ app.include_router(prices.router)
 app.include_router(purchases.router)
 app.include_router(stock.router)
 app.include_router(sales.router)
+app.include_router(receipts.router)
 
 
 @app.get("/api/health", tags=["meta"])
