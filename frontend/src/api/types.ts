@@ -176,3 +176,130 @@ export const MOVEMENT_LABELS: Record<string, string> = {
   damage: 'Damage',
   adjustment: 'Adjustment',
 }
+
+// ---- Sales ---------------------------------------------------------------------
+export interface PreviewLine {
+  product_id: number
+  product_name: string
+  qty: number
+  rate: Decimal
+  gst_rate: Decimal
+  gross: Decimal
+  taxable: Decimal
+  gst_amount: Decimal
+  available: number
+  cost_per_bag: Decimal | null
+  margin: Decimal | null
+  below_cost: boolean
+}
+
+export interface BillPreview {
+  customer_name: string
+  place_of_supply: string
+  is_interstate: boolean
+  lines: PreviewLine[]
+  delivery_taxable: Decimal
+  delivery_gst: Decimal
+  taxable_total: Decimal
+  cgst_total: Decimal
+  sgst_total: Decimal
+  igst_total: Decimal
+  round_off: Decimal
+  grand_total: Decimal
+  total_bags: number
+  outstanding: Decimal | null
+  credit_limit: Decimal | null
+  over_limit: boolean
+  margin: Decimal | null
+  warnings: string[]
+}
+
+export interface SaleSummary {
+  id: number
+  invoice_no: string
+  invoice_date: string
+  customer_name: string
+  party_id: number | null
+  payment_mode: 'cash' | 'credit'
+  total_bags: number
+  grand_total: Decimal
+  status: 'active' | 'cancelled'
+  has_returns: boolean
+}
+
+export interface SaleLine {
+  id: number
+  product_id: number
+  product_name: string
+  hsn_code: string
+  qty: number
+  qty_returned: number
+  rate: Decimal
+  gst_rate: Decimal
+  taxable: Decimal
+  gst_amount: Decimal
+  cost_per_bag: Decimal | null
+}
+
+export interface SaleReturn {
+  id: number
+  return_no: string
+  return_date: string
+  reason: string
+  taxable_total: Decimal
+  cgst_total: Decimal
+  sgst_total: Decimal
+  igst_total: Decimal
+  round_off: Decimal
+  total: Decimal
+  lines: { sales_line_id: number; product_name: string; qty: number; taxable: Decimal; gst_amount: Decimal }[]
+}
+
+export interface Sale extends SaleSummary {
+  customer_phone: string | null
+  customer_gstin: string | null
+  customer_address: string | null
+  place_of_supply: string
+  is_interstate: boolean
+  godown_id: number
+  godown_name: string
+  vehicle_no: string | null
+  delivery_address: string | null
+  delivery_charge: Decimal
+  delivery_taxable: Decimal
+  delivery_gst: Decimal
+  taxable_total: Decimal
+  cgst_total: Decimal
+  sgst_total: Decimal
+  igst_total: Decimal
+  round_off: Decimal
+  amount_in_words: string
+  cost_total: Decimal | null
+  margin: Decimal | null
+  credit_override_reason: string | null
+  notes: string | null
+  cancel_reason: string | null
+  cancelled_at: string | null
+  created_at: string
+  lines: SaleLine[]
+  returns: SaleReturn[]
+}
+
+export interface Shop {
+  name: string
+  address: string
+  gstin: string
+  phone: string
+  bank: string
+  state_code: string
+  state_name: string
+}
+
+export interface Quote {
+  product_id: number
+  party_id: number | null
+  rate: Decimal
+  source: 'party' | 'list'
+  effective_from: string
+  gst_rate: Decimal
+}

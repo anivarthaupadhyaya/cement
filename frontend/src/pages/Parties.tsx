@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { api } from '../api/client'
 import type { Party, PartyKind } from '../api/types'
@@ -8,6 +8,7 @@ import { useMe } from '../lib/auth'
 import { formatINR } from '../lib/format'
 import { can } from '../lib/roles'
 import { STATES } from '../lib/states'
+import { useDebounced } from '../lib/useDebounced'
 
 type FormState = {
   kind: PartyKind
@@ -49,15 +50,6 @@ const toForm = (p: Party): FormState => ({
 })
 
 const blankToNull = (v: string) => (v.trim() === '' ? null : v.trim())
-
-function useDebounced<T>(value: T, ms = 250): T {
-  const [v, setV] = useState(value)
-  useEffect(() => {
-    const t = setTimeout(() => setV(value), ms)
-    return () => clearTimeout(t)
-  }, [value, ms])
-  return v
-}
 
 export function PartiesPage() {
   const qc = useQueryClient()
