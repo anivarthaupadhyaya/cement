@@ -11,9 +11,10 @@ from sqlalchemy import select
 
 from app.core.config import get_settings
 from app.core.db import SessionLocal
-from app.models import Brand, Party, Product
+from app.models import Brand, Party, Product, Purchase
 from app.services.gst import gstin_checksum
 from app.services.pricing import set_prices
+from app.services.purchases import LineInput, create_purchase
 
 BRANDS = {
     "UltraTech": [("OPC 53", "420"), ("PPC", "395")],
@@ -70,6 +71,29 @@ def main() -> None:
                     credit_limit=Decimal(limit),
                     credit_days=days,
                 )
+            )
+        db.flush()
+
+        # One truckload from the CFA so the stock page has something in it.
+        if db.scalar(select(Purchase.id).limit(1)) is None:
+            supplier = db.scalar(select(Party).where(Party.kind == "supplier"))
+            products = db.scalars(select(Product).order_by(Product.id)).all()
+            assert supplier is not None
+            create_purchase(
+                db,
+                supplier=supplier,
+                supplier_invoice_no="UT/DEMO/0001",
+                invoice_date=today - timedelta(days=2),
+                received_date=today - timedelta(days=1),
+                godown_id=1,
+                vehicle_no="KA20AB1234",
+                freight=Decimal("4500"),
+                unloading=Decimal("600"),
+                lines=[
+                    LineInput(products[0].id, 200, 197, 3, Decimal("335")),
+                    LineInput(products[1].id, 150, 150, 0, Decimal("310")),
+                    LineInput(products[2].id, 50, 48, 0, Decimal("330")),
+                ],
             )
         db.commit()
     print("Demo data loaded.")
