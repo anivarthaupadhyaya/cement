@@ -136,9 +136,9 @@ def preview(
         "outstanding": ledger.party_outstanding(db, party.id),
         "open_items": _items_out(items, date.today()),
         "plan": [
-            {"kind": i.kind, "id": i.id, "ref_no": i.ref_no, "amount": amt} for i, amt in plan
+            {"kind": i.kind, "id": i.id, "ref_no": i.ref_no, "amount": q2(amt)} for i, amt in plan
         ],
-        "advance_after": adv + body.amount - used,
+        "advance_after": q2(adv + body.amount - used),
         "bounced_cheques": svc.bounce_count(db, party.id),
     }
 
