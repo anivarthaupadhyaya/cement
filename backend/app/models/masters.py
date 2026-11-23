@@ -56,8 +56,12 @@ class Product(TimestampMixin, Base):
     brand: Mapped[Brand] = relationship(back_populates="products", lazy="joined")
 
     @property
+    def brand_name(self) -> str:
+        return self.brand.name
+
+    @property
     def name(self) -> str:
-        kg = self.bag_kg.normalize() if self.bag_kg is not None else ""
+        kg = format(self.bag_kg.normalize(), "f")  # 50.00 -> "50", 42.50 -> "42.5"
         return f"{self.brand.name} {self.grade} ({kg} kg)"
 
 
